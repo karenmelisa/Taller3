@@ -1,4 +1,4 @@
-package com.logistics.shipping_ops_producer.publisher;
+package com.shipping.ops_producer.publisher;
 
 import com.logistics.events.ShipmentEvent;
 import com.logistics.shipping_ops_producer.api.ShipmentRequest;
@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class KafkaEventPublisher {
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final com.shipping.ops_producer.publisher.KafkaTemplate<String, Object> kafkaTemplate;
 
     @Value("${kafka.topic.shipments}")
     private String shipmentsTopic;

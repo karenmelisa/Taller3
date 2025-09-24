@@ -1,4 +1,4 @@
-package com.logistics.shipping_ops_producer.api;
+package com.shipping.ops_producer.api.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

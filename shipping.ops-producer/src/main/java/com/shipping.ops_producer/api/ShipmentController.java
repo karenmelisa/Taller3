@@ -1,4 +1,4 @@
-package com.logistics.shipping_ops_producer.api;
+package com.shipping.ops_producer.api;
 
 import com.logistics.shipping_ops_producer.publisher.KafkaEventPublisher;
 import com.logistics.shipping_ops_producer.infrastructure.redis.RedisSnapshotRepository;
@@ -24,29 +24,29 @@ public class ShipmentController {
     private final RedisSnapshotRepository redisSnapshotRepository;
 
     @PostMapping
-    public Mono<ResponseEntity<ShipmentResponse>> createShipment(@Valid @RequestBody ShipmentRequest request) {
+    public Mono<ResponseEntity<com.shipping.ops_producer.api.dto.ShipmentResponse>> createShipment(@Valid @RequestBody com.shipping.ops_producer.api.dto.ShipmentRequest request) {
         log.info("Received shipment request for shipmentId: {}, attemptNumber: {}",
                  request.getShipmentId(), request.getAttemptNumber());
 
         String eventId = UUID.randomUUID().toString();
 
         return kafkaEventPublisher.publishShipmentEvent(eventId, request)
-                .flatMap(success -> {
+                .flatMap(success -> {z
                     if (success) {
                         return redisSnapshotRepository.saveSnapshot(request.getShipmentId(), request)
                                 .map(saved -> ResponseEntity.status(HttpStatus.ACCEPTED)
-                                        .body(new ShipmentResponse(eventId, "Shipment event published successfully")))
+                                        .body(new com.shipping.ops_producer.api.dto.ShipmentResponse(eventId, "Shipment event published successfully")))
                                 .onErrorReturn(ResponseEntity.status(HttpStatus.ACCEPTED)
-                                        .body(new ShipmentResponse(eventId, "Event published but snapshot save failed")));
+                                        .body(new com.shipping.ops_producer.api.dto.ShipmentResponse(eventId, "Event published but snapshot save failed")));
                     } else {
                         return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                .body(new ShipmentResponse(eventId, "Failed to publish shipment event")));
+                                .body(new com.shipping.ops_producer.api.dto.ShipmentResponse(eventId, "Failed to publish shipment event")));
                     }
                 })
                 .doOnSuccess(response -> log.info("Shipment processing completed for eventId: {}", eventId))
                 .doOnError(error -> log.error("Error processing shipment request: ", error))
                 .onErrorReturn(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(new ShipmentResponse(eventId, "Internal server error")));
+                        .body(new com.shipping.ops_producer.api.dto.ShipmentResponse(eventId, "Internal server error")));
     }
 
     @GetMapping("/health")
